@@ -1,18 +1,12 @@
-import { Checkbox, FormControl, FormControlLabel, FormLabel, Radio, RadioGroup, Stack, Typography } from '@mui/material';
-import { Controller, UseFormReturn } from 'react-hook-form';
-import { StepFourValues } from '../../../lib/formSchema';
-
-type StepGenerateContentProps = {
-  form: UseFormReturn<StepFourValues>;
-};
+import { Checkbox, FormControl, FormControlLabel, FormLabel, Radio, RadioGroup, Typography } from '@mui/material';
+import { Controller } from 'react-hook-form';
+import { StepComponentProps } from '../types';
 
 const styles = ['modern educational', 'cartoon & friendly', 'realistic with people', 'minimalist'];
 
-export default function StepGenerateContent({ form }: StepGenerateContentProps) {
-  const { control, formState } = form;
-
+export default function StepGenerateContent({ control, form }: StepComponentProps) {
   return (
-    <Stack spacing={2}>
+    <>
       <Controller
         name="includeImages"
         control={control}
@@ -23,8 +17,8 @@ export default function StepGenerateContent({ form }: StepGenerateContentProps) 
           />
         )}
       />
-      <FormControl error={!!formState.errors.imageStyle}>
-        <FormLabel>Image style</FormLabel>
+      <FormControl error={!!form.formState.errors.imageStyle}>
+        <FormLabel sx={{ color: '#fff' }}>Image style</FormLabel>
         <Controller
           name="imageStyle"
           control={control}
@@ -37,9 +31,9 @@ export default function StepGenerateContent({ form }: StepGenerateContentProps) 
           )}
         />
         <Typography variant="caption" color="error">
-          {formState.errors.imageStyle?.message}
+          {form.formState.errors.imageStyle?.message}
         </Typography>
       </FormControl>
-    </Stack>
+    </>
   );
 }

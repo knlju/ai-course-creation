@@ -1,16 +1,10 @@
-import { Stack, TextField } from '@mui/material';
-import { Controller, UseFormReturn } from 'react-hook-form';
-import { StepTwoValues } from '../../../lib/formSchema';
+import { TextField } from '@mui/material';
+import { Controller } from 'react-hook-form';
+import { StepComponentProps } from '../types';
 
-type StepSetContextProps = {
-  form: UseFormReturn<StepTwoValues>;
-};
-
-export default function StepSetContext({ form }: StepSetContextProps) {
-  const { control } = form;
-
+export default function StepSetContext({ control }: StepComponentProps) {
   return (
-    <Stack spacing={2}>
+    <>
       <Controller
         name="learningGoal"
         control={control}
@@ -51,6 +45,6 @@ export default function StepSetContext({ form }: StepSetContextProps) {
           />
         )}
       />
-    </Stack>
+    </>
   );
 }

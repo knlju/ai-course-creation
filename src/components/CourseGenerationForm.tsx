@@ -1,7 +1,7 @@
 import { Box, Button, Card, CardContent, Grid, Stack, Typography } from '@mui/material';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useQuery } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import FormStepSidebar, { FormStep } from './course-form/FormStepSidebar';
 import StepCourseStructure from './course-form/steps/StepCourseStructure';
@@ -10,10 +10,7 @@ import StepGenerateContent from './course-form/steps/StepGenerateContent';
 import StepSetContext from './course-form/steps/StepSetContext';
 import {
   FormValues,
-  StepFourValues,
-  StepOneValues,
-  StepThreeValues,
-  StepTwoValues,
+  fullSchema,
   stepFourSchema,
   stepOneSchema,
   stepThreeSchema,
@@ -28,119 +25,82 @@ const steps: FormStep[] = [
   { title: 'Generate content', subtitle: 'Finalize preferences' },
 ];
 
-const defaultValues: FormValues = {
-  courseTopic: '',
-  language: '',
-  formOfAddress: 'formal',
-  audience: '',
-  learnerProficiency: 'entry',
-  coursePace: 'quick',
-  learningGoal: '',
-  courseTitle: '',
-  courseDescription: '',
-  modules: [],
-  includeImages: true,
-  imageStyle: '',
-};
-
 export default function CourseGenerationForm() {
   const [activeStep, setActiveStep] = useState(0);
   const [selectedStructureId, setSelectedStructureId] = useState<string | null>(null);
-  const [formData, setFormData] = useState<FormValues>(defaultValues);
 
-  const {
-    data: suggestedStructures = [],
-    isLoading,
-    isError,
-    error,
-  } = useQuery({
+  const { data: suggestedStructures = [], isLoading } = useQuery({
     queryKey: ['suggested-structures'],
     queryFn: fetchSuggestedStructures,
   });
 
-  const stepOneForm = useForm<StepOneValues>({
-    resolver: zodResolver(stepOneSchema),
+  const form = useForm<FormValues>({
+    resolver: zodResolver(fullSchema),
     mode: 'onTouched',
     defaultValues: {
-      courseTopic: formData.courseTopic,
-      language: formData.language,
-      formOfAddress: formData.formOfAddress,
-      audience: formData.audience,
-      learnerProficiency: formData.learnerProficiency,
-      coursePace: formData.coursePace,
+      courseTopic: '',
+      language: '',
+      audience: '',
+      coursePace: undefined,
+      learningGoal: '',
+      courseTitle: '',
+      courseDescription: '',
+      modules: [],
+      includeImages: true,
+      imageStyle: '',
     },
   });
 
-  const stepTwoForm = useForm<StepTwoValues>({
-    resolver: zodResolver(stepTwoSchema),
-    mode: 'onTouched',
-    defaultValues: {
-      learningGoal: formData.learningGoal,
-      courseTitle: formData.courseTitle,
-      courseDescription: formData.courseDescription,
-    },
-  });
+  const stepFields = useMemo<Record<number, Array<keyof FormValues>>>(
+    () => ({
+      0: ['courseTopic', 'language', 'audience', 'coursePace'],
+      1: ['learningGoal', 'courseTitle', 'courseDescription'],
+      2: ['modules'],
+      3: ['includeImages', 'imageStyle'],
+    }),
+    []
+  );
 
-  const stepThreeForm = useForm<StepThreeValues>({
-    resolver: zodResolver(stepThreeSchema),
-    mode: 'onTouched',
-    defaultValues: { modules: formData.modules },
-  });
+  const validateStep = () => {
+    const values = form.getValues();
+    const schemaByStep = [stepOneSchema, stepTwoSchema, stepThreeSchema, stepFourSchema][activeStep];
+    const result = schemaByStep.safeParse(values);
 
-  const stepFourForm = useForm<StepFourValues>({
-    resolver: zodResolver(stepFourSchema),
-    mode: 'onTouched',
-    defaultValues: {
-      includeImages: formData.includeImages,
-      imageStyle: formData.imageStyle,
-    },
-  });
+    if (result.success) {
+      return true;
+    }
 
-  const onSelectStructure = (structure: SuggestedStructure) => {
-    setSelectedStructureId(structure.id);
-    stepThreeForm.setValue('modules', structure.modules, { shouldValidate: true });
+    result.error.issues.forEach((issue) => {
+      const path = issue.path.join('.') as keyof FormValues;
+      form.setError(path, { message: issue.message });
+    });
+
+    return false;
   };
 
   const nextStep = async () => {
-    if (activeStep === 0) {
-      await stepOneForm.handleSubmit((values) => {
-        setFormData((prev) => ({ ...prev, ...values }));
-        setActiveStep(1);
-      })();
-      return;
-    }
-
-    if (activeStep === 1) {
-      await stepTwoForm.handleSubmit((values) => {
-        setFormData((prev) => ({ ...prev, ...values }));
-        setActiveStep(2);
-      })();
-      return;
-    }
-
-    if (activeStep === 2) {
-      await stepThreeForm.handleSubmit((values) => {
-        setFormData((prev) => ({ ...prev, ...values }));
-        setActiveStep(3);
-      })();
+    const validRHF = await form.trigger(stepFields[activeStep]);
+    const validZod = validateStep();
+    if (validRHF && validZod) {
+      setActiveStep((step) => Math.min(step + 1, steps.length - 1));
     }
   };
 
   const previousStep = () => {
-    if (activeStep > 0) {
-      setActiveStep((step) => step - 1);
-    }
+    setActiveStep((step) => Math.max(step - 1, 0));
   };
 
-  const onSubmit = async () => {
-    await stepFourForm.handleSubmit((values) => {
-      const payload = { ...formData, ...values };
-      alert(`Course generated!\n\n${JSON.stringify(payload, null, 2)}`);
-    })();
+  const onSelectStructure = (structure: SuggestedStructure) => {
+    setSelectedStructureId(structure.id);
+    form.setValue('modules', structure.modules, { shouldValidate: true });
+  };
+
+  const onSubmit = (values: FormValues) => {
+    alert(`Course generated!\n\n${JSON.stringify(values, null, 2)}`);
   };
 
   return (
-    <Card sx={{ borderRadius: 2 }}>
+    <Card sx={{ background: '#232945', color: '#fff', borderRadius: 2 }}>
       <CardContent>
         <Grid container>
           <FormStepSidebar steps={steps} activeStep={activeStep} />
@@ -150,24 +110,23 @@ export default function CourseGenerationForm() {
               {steps[activeStep].title}
             </Typography>
 
-            <Stack spacing={2}>
-              {activeStep === 0 && <StepDefinePurpose form={stepOneForm} />}
+            <Stack spacing={2} component="form" onSubmit={form.handleSubmit(onSubmit)}>
+              {activeStep === 0 && <StepDefinePurpose control={form.control} form={form} />}
 
-              {activeStep === 1 && <StepSetContext form={stepTwoForm} />}
+              {activeStep === 1 && <StepSetContext control={form.control} form={form} />}
 
               {activeStep === 2 && (
                 <StepCourseStructure
-                  form={stepThreeForm}
+                  control={form.control}
+                  form={form}
                   isLoading={isLoading}
-                  isError={isError}
-                  errorMessage={error instanceof Error ? error.message : undefined}
                   suggestedStructures={suggestedStructures}
                   selectedStructureId={selectedStructureId}
                   onSelectStructure={onSelectStructure}
                 />
               )}
 
-              {activeStep === 3 && <StepGenerateContent form={stepFourForm} />}
+              {activeStep === 3 && <StepGenerateContent control={form.control} form={form} />}
 
               <Box display="flex" justifyContent="space-between" pt={2}>
                 <Button disabled={activeStep === 0} onClick={previousStep} variant="outlined">
@@ -179,7 +138,7 @@ export default function CourseGenerationForm() {
                     Next
                   </Button>
                 ) : (
-                  <Button onClick={onSubmit} variant="contained">
+                  <Button type="submit" variant="contained">
                     Generate course
                   </Button>
                 )}

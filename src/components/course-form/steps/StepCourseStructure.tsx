@@ -1,13 +1,10 @@
-import { Alert, Box, Card, CardContent, CircularProgress, Grid, Stack, Typography } from '@mui/material';
-import { useFieldArray, UseFormReturn } from 'react-hook-form';
-import { StepThreeValues } from '../../../lib/formSchema';
+import { Alert, Box, Card, CardContent, CircularProgress, Grid, Typography } from '@mui/material';
+import { useFieldArray } from 'react-hook-form';
 import { SuggestedStructure } from '../../../lib/mockApi';
+import { StepComponentProps } from '../types';
 
-type StepCourseStructureProps = {
-  form: UseFormReturn<StepThreeValues>;
+type StepCourseStructureProps = StepComponentProps & {
   isLoading: boolean;
-  isError: boolean;
-  errorMessage?: string;
   suggestedStructures: SuggestedStructure[];
   selectedStructureId: string | null;
   onSelectStructure: (structure: SuggestedStructure) => void;
@@ -15,24 +12,20 @@ type StepCourseStructureProps = {
 
 export default function StepCourseStructure({
   form,
+  control,
   isLoading,
-  isError,
-  errorMessage,
   suggestedStructures,
   selectedStructureId,
   onSelectStructure,
 }: StepCourseStructureProps) {
-  const { control } = form;
   const modulesArray = useFieldArray({ control, name: 'modules' });
 
   return (
-    <Stack spacing={2}>
+    <>
       {isLoading ? (
         <Box display="flex" justifyContent="center" py={4}>
           <CircularProgress />
         </Box>
-      ) : isError ? (
-        <Alert severity="error">{errorMessage ?? 'Unable to load suggested structures.'}</Alert>
       ) : (
         <Grid container spacing={2}>
           {suggestedStructures.map((structure) => (
@@ -75,7 +68,7 @@ export default function StepCourseStructure({
                 {index + 1}. {module.title}
               </Typography>
               {module.lessons.map((lesson, lessonIndex) => (
-                <Typography key={`${module.id}-${lessonIndex}`} variant="body2" color="text.secondary">
+                <Typography key={`${module.id}-${lessonIndex}`} variant="body2" color="#b8bdd8">
                   - {lesson.title}
                 </Typography>
               ))}
@@ -83,6 +76,6 @@ export default function StepCourseStructure({
           ))}
         </Box>
       )}
-    </Stack>
+    </>
   );
 }
