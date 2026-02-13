@@ -154,9 +154,18 @@ export default function CourseGenerationForm() {
   const onSelectStructure = (structure: SuggestedStructure) => {
     setSelectedStructureId(structure.id);
     form.setValue('structureLabel', structure.label, { shouldValidate: true });
-    form.setValue('modules', structure.modules.map(({ title, lessons, quizTitle }) => ({ title, lessons, quizTitle })), {
-      shouldValidate: true,
-    });
+    form.setValue(
+      'modules',
+      structure.modules.map(({ title, lessons, quizTitle }) => ({
+        title,
+        lessons,
+        quizTitle,
+        quizPosition: lessons.length,
+      })),
+      {
+        shouldValidate: true,
+      }
+    );
   };
 
   const onSubmit = (values: FormValues) => {
