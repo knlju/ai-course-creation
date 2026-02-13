@@ -38,10 +38,18 @@ export default function SuggestionTextField({
   model,
 }: Props) {
   const [refreshCount, setRefreshCount] = useState(0);
-  const context = form.watch(['courseTopic', 'language', 'audience', 'learningGoal', 'courseTitle']);
-  const [courseTopic, language, audience, learningGoal, courseTitle] = context;
+  const context = form.watch([
+    'courseTopic',
+    'language',
+    'audience',
+    'learnerProficiency',
+    'courseDuration',
+    'learningGoal',
+    'courseTitle',
+  ]);
+  const [courseTopic, language, audience, learnerProficiency, courseDuration, learningGoal, courseTitle] = context;
 
-  const canGenerate = Boolean(courseTopic && language && audience);
+  const canGenerate = Boolean(courseTopic && language && audience && learnerProficiency && courseDuration);
 
   const suggestionsQuery = useQuery({
     queryKey: ['ai-suggestions', name, provider, model, refreshCount],
@@ -53,6 +61,8 @@ export default function SuggestionTextField({
         courseTopic,
         language,
         audience,
+        learnerProficiency,
+        courseDuration,
         learningGoal,
         courseTitle,
       }),
@@ -109,7 +119,7 @@ export default function SuggestionTextField({
 
       {!canGenerate && (
         <Typography variant="caption" color="text.secondary">
-          Fill topic, language, and audience in step 1 to enable suggestions.
+          Fill topic, language, audience, proficiency, and duration in step 1 to enable suggestions.
         </Typography>
       )}
 

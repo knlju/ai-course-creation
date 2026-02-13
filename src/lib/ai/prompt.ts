@@ -2,7 +2,10 @@ import { FormValues } from '../formSchema';
 
 export type SuggestionField = 'learningGoal' | 'courseTitle' | 'courseDescription';
 
-type PromptInput = Pick<FormValues, 'courseTopic' | 'language' | 'audience' | 'learningGoal' | 'courseTitle'>;
+type PromptInput = Pick<
+  FormValues,
+  'courseTopic' | 'language' | 'audience' | 'learnerProficiency' | 'courseDuration' | 'learningGoal' | 'courseTitle'
+>;
 
 const fieldInstructions: Record<SuggestionField, string> = {
   learningGoal:
@@ -25,6 +28,8 @@ export function buildSuggestionPrompt(field: SuggestionField, input: PromptInput
     `Course topic: ${input.courseTopic || 'N/A'}`,
     `Language: ${input.language || 'English'}`,
     `Audience: ${input.audience || 'N/A'}`,
+    `Learner proficiency: ${input.learnerProficiency || 'N/A'}`,
+    `Course duration: ${input.courseDuration || 'N/A'}`,
     `Current learning goal: ${input.learningGoal || 'N/A'}`,
     `Current course title: ${input.courseTitle || 'N/A'}`,
     `Target field: ${field}`,

@@ -7,6 +7,8 @@ type FetchCourseStructuresInput = {
   courseTopic: string;
   language: string;
   audience: string;
+  learnerProficiency: 'entry' | 'intermediate' | 'advanced';
+  courseDuration: 'quick' | 'regular' | 'extensive';
   learningGoal: string;
   courseTitle: string;
 };
