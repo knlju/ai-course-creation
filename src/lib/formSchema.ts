@@ -28,6 +28,7 @@ export const moduleSchema = z.object({
   title: z.string().min(3, 'Module title is required.'),
   lessons: z.array(lessonSchema).min(1, 'At least one lesson is required.'),
   quizTitle: z.string().optional(),
+  quizPosition: z.number().int().nonnegative().optional(),
 });
 
 export const stepThreeSchema = z.object({
