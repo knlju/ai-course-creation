@@ -48,8 +48,11 @@ export default function CourseGenerationForm() {
       courseDescription: '',
       structureLabel: '',
       modules: [],
-      includeImages: true,
-      imageStyle: '',
+      generateAllContent: true,
+      generateModuleSummaries: true,
+      generateLessonText: true,
+      generateKnowledgeChecks: true,
+      generateFinalAssessment: true,
     },
   });
 
@@ -108,7 +111,13 @@ export default function CourseGenerationForm() {
       1: ['learningGoal', 'courseTitle', 'courseDescription'],
       2: ['structureLabel', 'modules'],
       3: ['structureLabel', 'modules'],
-      4: ['includeImages', 'imageStyle'],
+      4: [
+        'generateAllContent',
+        'generateModuleSummaries',
+        'generateLessonText',
+        'generateKnowledgeChecks',
+        'generateFinalAssessment',
+      ],
     }),
     []
   );
