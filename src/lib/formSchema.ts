@@ -27,13 +27,20 @@ export const lessonSchema = z.object({
 export const moduleSchema = z.object({
   title: z.string().min(3, 'Module title is required.'),
   lessons: z.array(lessonSchema).min(1, 'At least one lesson is required.'),
+  quizTitle: z.string().optional(),
 });
 
 export const stepThreeSchema = z.object({
+  structureLabel: z.string().min(1, 'Please choose a structure.'),
   modules: z.array(moduleSchema).min(1, 'Pick a structure with at least one module.'),
 });
 
 export const stepFourSchema = z.object({
+  structureLabel: z.string().min(1, 'Structure label is required.'),
+  modules: z.array(moduleSchema).min(1, 'At least one module is required.'),
+});
+
+export const stepFiveSchema = z.object({
   includeImages: z.boolean(),
   imageStyle: z.string().min(1, 'Choose an image style.'),
 });
@@ -41,10 +48,11 @@ export const stepFourSchema = z.object({
 export const fullSchema = stepOneSchema
   .merge(stepTwoSchema)
   .merge(stepThreeSchema)
-  .merge(stepFourSchema);
+  .merge(stepFiveSchema);
 
 export type FormValues = z.infer<typeof fullSchema>;
 export type StepOneValues = z.infer<typeof stepOneSchema>;
 export type StepTwoValues = z.infer<typeof stepTwoSchema>;
 export type StepThreeValues = z.infer<typeof stepThreeSchema>;
 export type StepFourValues = z.infer<typeof stepFourSchema>;
+export type StepFiveValues = z.infer<typeof stepFiveSchema>;
