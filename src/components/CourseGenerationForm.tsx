@@ -7,11 +7,13 @@ import FormStepSidebar, { FormStep } from './course-form/FormStepSidebar';
 import StepCourseStructure from './course-form/steps/StepCourseStructure';
 import StepDefinePurpose from './course-form/steps/StepDefinePurpose';
 import StepGenerateContent from './course-form/steps/StepGenerateContent';
+import StepModulesAndLessonsEditor from './course-form/steps/StepModulesAndLessonsEditor';
 import StepSetContext from './course-form/steps/StepSetContext';
 import {
   FormValues,
   fullSchema,
   stepFourSchema,
+  stepFiveSchema,
   stepOneSchema,
   stepThreeSchema,
   stepTwoSchema,
@@ -23,7 +25,8 @@ const steps: FormStep[] = [
   { title: 'Define the purpose', subtitle: 'Describe your course' },
   { title: 'Set the context', subtitle: 'Explain the background' },
   { title: 'Course structure', subtitle: 'Define modules and lessons' },
-  { title: 'Generate content', subtitle: 'Finalize preferences' },
+  { title: 'Modules and lessons', subtitle: 'Revise generated structure manually' },
+  { title: 'Generate content', subtitle: 'Let the AI create content' },
 ];
 
 export default function CourseGenerationForm() {
@@ -42,6 +45,7 @@ export default function CourseGenerationForm() {
       learningGoal: '',
       courseTitle: '',
       courseDescription: '',
+      structureLabel: '',
       modules: [],
       includeImages: true,
       imageStyle: '',
@@ -89,15 +93,16 @@ export default function CourseGenerationForm() {
     () => ({
       0: ['courseTopic', 'language', 'audience', 'coursePace'],
       1: ['learningGoal', 'courseTitle', 'courseDescription'],
-      2: ['modules'],
-      3: ['includeImages', 'imageStyle'],
+      2: ['structureLabel', 'modules'],
+      3: ['structureLabel', 'modules'],
+      4: ['includeImages', 'imageStyle'],
     }),
     []
   );
 
   const validateStep = () => {
     const values = form.getValues();
-    const schemaByStep = [stepOneSchema, stepTwoSchema, stepThreeSchema, stepFourSchema][activeStep];
+    const schemaByStep = [stepOneSchema, stepTwoSchema, stepThreeSchema, stepFourSchema, stepFiveSchema][activeStep];
     const result = schemaByStep.safeParse(values);
 
     if (result.success) {
@@ -126,7 +131,8 @@ export default function CourseGenerationForm() {
 
   const onSelectStructure = (structure: SuggestedStructure) => {
     setSelectedStructureId(structure.id);
-    form.setValue('modules', structure.modules.map(({ title, lessons }) => ({ title, lessons })), {
+    form.setValue('structureLabel', structure.label, { shouldValidate: true });
+    form.setValue('modules', structure.modules.map(({ title, lessons, quizTitle }) => ({ title, lessons, quizTitle })), {
       shouldValidate: true,
     });
   };
@@ -168,7 +174,9 @@ export default function CourseGenerationForm() {
                 </>
               )}
 
-              {activeStep === 3 && <StepGenerateContent control={form.control} form={form} />}
+              {activeStep === 3 && <StepModulesAndLessonsEditor control={form.control} form={form} />}
+
+              {activeStep === 4 && <StepGenerateContent control={form.control} form={form} />}
 
               <Box display="flex" justifyContent="space-between" pt={2}>
                 <Button disabled={activeStep === 0} onClick={previousStep} variant="outlined">
