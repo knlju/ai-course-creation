@@ -41,8 +41,11 @@ export const stepFourSchema = z.object({
 });
 
 export const stepFiveSchema = z.object({
-  includeImages: z.boolean(),
-  imageStyle: z.string().min(1, 'Choose an image style.'),
+  generateAllContent: z.boolean(),
+  generateModuleSummaries: z.boolean(),
+  generateLessonText: z.boolean(),
+  generateKnowledgeChecks: z.boolean(),
+  generateFinalAssessment: z.boolean(),
 });
 
 export const fullSchema = stepOneSchema
