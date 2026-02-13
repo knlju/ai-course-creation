@@ -166,7 +166,7 @@ function ModuleEditor({ control, form, moduleIndex, onDeleteModule, onMoveModule
   const moduleItems = getModuleItems();
 
   return (
-    <Box sx={{ border: '1px solid #4A4F6E', borderRadius: 2, p: 2 }}>
+    <Box sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 2, p: 2 }}>
       <Stack direction="row" spacing={1} alignItems="center" mb={1.5}>
         <DragIndicatorRoundedIcon fontSize="small" color="action" />
         <EditableText
@@ -204,7 +204,7 @@ function ModuleEditor({ control, form, moduleIndex, onDeleteModule, onMoveModule
 
                   setDraggingItem(null);
                 }}
-                sx={{ p: 1, borderRadius: 1, backgroundColor: '#2B3153' }}
+                sx={{ p: 1, borderRadius: 1, backgroundColor: 'background.default' }}
               >
                 <DragIndicatorRoundedIcon fontSize="small" color="action" />
                 <EditableText
@@ -241,7 +241,7 @@ function ModuleEditor({ control, form, moduleIndex, onDeleteModule, onMoveModule
 
                 setDraggingItem(null);
               }}
-              sx={{ p: 1, borderRadius: 1, backgroundColor: '#2B3153' }}
+              sx={{ p: 1, borderRadius: 1, backgroundColor: 'background.default' }}
             >
               <DragIndicatorRoundedIcon fontSize="small" color="action" />
               <QuizRoundedIcon fontSize="small" color="primary" />
@@ -322,7 +322,7 @@ export default function StepModulesAndLessonsEditor({ control, form }: StepCompo
 
   return (
     <Stack spacing={2}>
-      <Typography color="#b8bdd8">
+      <Typography color="text.secondary">
         Human-only step (no AI). Click edit to update text, drag to reorder modules and lessons, and add/remove modules,
         lessons, and quizzes.
       </Typography>

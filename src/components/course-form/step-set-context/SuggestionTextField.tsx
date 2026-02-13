@@ -135,11 +135,12 @@ export default function SuggestionTextField({
               label={suggestion}
               onChange={() => applySuggestion(suggestion)}
               sx={{
-                border: '1px solid rgba(255,255,255,0.1)',
+                border: '1px solid',
+                borderColor: 'divider',
                 borderRadius: 1,
                 px: 1,
                 mx: 0,
-                '&:hover': { backgroundColor: 'rgba(255,255,255,0.03)', cursor: 'pointer' },
+                '&:hover': { backgroundColor: 'action.hover', cursor: 'pointer' },
               }}
               onClick={() => applySuggestion(suggestion)}
             />

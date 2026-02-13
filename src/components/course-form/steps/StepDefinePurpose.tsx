@@ -105,7 +105,7 @@ export default function StepDefinePurpose({ control, form }: StepComponentProps)
       />
 
       <FormControl error={!!form.formState.errors.courseDuration}>
-        <FormLabel sx={{ color: '#fff' }}>How long do you think this course should ideally run?</FormLabel>
+        <FormLabel>How long do you think this course should ideally run?</FormLabel>
         <Controller
           name="courseDuration"
           control={control}
@@ -122,7 +122,7 @@ export default function StepDefinePurpose({ control, form }: StepComponentProps)
                     key={option.value}
                     sx={{
                       border: '1px solid',
-                      borderColor: selected ? 'primary.main' : 'rgba(255,255,255,0.2)',
+                      borderColor: selected ? 'primary.main' : 'divider',
                       borderRadius: 2,
                       p: 2,
                     }}
@@ -133,7 +133,7 @@ export default function StepDefinePurpose({ control, form }: StepComponentProps)
                       label={<Typography variant="subtitle1">{option.title}</Typography>}
                       sx={{ alignItems: 'flex-start', m: 0 }}
                     />
-                    <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                    <Typography variant="body2" color="text.secondary" sx={{ mt: 1, lineHeight: 1.5 }}>
                       {option.description}
                     </Typography>
                   </Box>
