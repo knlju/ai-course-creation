@@ -1,7 +1,7 @@
 import { Box, Button, Card, CardContent, Grid, Stack, Typography } from '@mui/material';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useQuery } from '@tanstack/react-query';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import FormStepSidebar, { FormStep } from './course-form/FormStepSidebar';
 import StepCourseStructure from './course-form/steps/StepCourseStructure';
@@ -16,7 +16,8 @@ import {
   stepThreeSchema,
   stepTwoSchema,
 } from '../lib/formSchema';
-import { fetchSuggestedStructures, SuggestedStructure } from '../lib/mockApi';
+import { fetchCourseStructures } from '../lib/ai/fetchCourseStructures';
+import { SuggestedStructure } from '../lib/ai/courseStructure';
 
 const steps: FormStep[] = [
   { title: 'Define the purpose', subtitle: 'Describe your course' },
@@ -28,11 +29,7 @@ const steps: FormStep[] = [
 export default function CourseGenerationForm() {
   const [activeStep, setActiveStep] = useState(0);
   const [selectedStructureId, setSelectedStructureId] = useState<string | null>(null);
-
-  const { data: suggestedStructures = [], isLoading } = useQuery({
-    queryKey: ['suggested-structures'],
-    queryFn: fetchSuggestedStructures,
-  });
+  const [structureRefreshCount, setStructureRefreshCount] = useState(0);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(fullSchema),
@@ -50,6 +47,43 @@ export default function CourseGenerationForm() {
       imageStyle: '',
     },
   });
+
+  const context = form.watch(['courseTopic', 'language', 'audience', 'learningGoal', 'courseTitle']);
+  const [courseTopic, language, audience, learningGoal, courseTitle] = context;
+  const canGenerateStructure = Boolean(courseTopic && language && audience && learningGoal && courseTitle);
+
+  const {
+    data: suggestedStructures = [],
+    isFetching: isLoading,
+    isError: isStructureError,
+    error: structureError,
+    refetch: refetchStructures,
+  } = useQuery({
+    queryKey: ['ai-course-structures', structureRefreshCount],
+    queryFn: () =>
+      fetchCourseStructures({
+        provider: 'openai',
+        model: 'gpt-4.1-nano',
+        courseTopic,
+        language,
+        audience,
+        learningGoal,
+        courseTitle,
+      }),
+    enabled: false,
+  });
+
+  useEffect(() => {
+    if (activeStep === 2 && canGenerateStructure && structureRefreshCount === 0 && suggestedStructures.length === 0) {
+      setStructureRefreshCount(1);
+    }
+  }, [activeStep, canGenerateStructure, structureRefreshCount, suggestedStructures.length]);
+
+  useEffect(() => {
+    if (structureRefreshCount > 0) {
+      void refetchStructures();
+    }
+  }, [refetchStructures, structureRefreshCount]);
 
   const stepFields = useMemo<Record<number, Array<keyof FormValues>>>(
     () => ({
@@ -92,7 +126,9 @@ export default function CourseGenerationForm() {
 
   const onSelectStructure = (structure: SuggestedStructure) => {
     setSelectedStructureId(structure.id);
-    form.setValue('modules', structure.modules, { shouldValidate: true });
+    form.setValue('modules', structure.modules.map(({ title, lessons }) => ({ title, lessons })), {
+      shouldValidate: true,
+    });
   };
 
   const onSubmit = (values: FormValues) => {
@@ -116,14 +152,20 @@ export default function CourseGenerationForm() {
               {activeStep === 1 && <StepSetContext control={form.control} form={form} />}
 
               {activeStep === 2 && (
-                <StepCourseStructure
-                  control={form.control}
-                  form={form}
-                  isLoading={isLoading}
-                  suggestedStructures={suggestedStructures}
-                  selectedStructureId={selectedStructureId}
-                  onSelectStructure={onSelectStructure}
-                />
+                <>
+                  {isStructureError && (
+                    <Typography color="error.light">{(structureError as Error).message}</Typography>
+                  )}
+                  <StepCourseStructure
+                    control={form.control}
+                    form={form}
+                    isLoading={isLoading}
+                    suggestedStructures={suggestedStructures}
+                    selectedStructureId={selectedStructureId}
+                    onSelectStructure={onSelectStructure}
+                    onRegenerate={() => setStructureRefreshCount((count) => count + 1)}
+                  />
+                </>
               )}
 
               {activeStep === 3 && <StepGenerateContent control={form.control} form={form} />}

@@ -11,7 +11,7 @@ import {
   Typography,
 } from '@mui/material';
 import { useQuery } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Controller, UseFormReturn } from 'react-hook-form';
 import { fetchSuggestions } from '../../../lib/ai/fetchSuggestions';
 import { AiProvider } from '../../../lib/ai/models';
@@ -44,18 +44,7 @@ export default function SuggestionTextField({
   const canGenerate = Boolean(courseTopic && language && audience);
 
   const suggestionsQuery = useQuery({
-    queryKey: [
-      'ai-suggestions',
-      name,
-      provider,
-      model,
-      refreshCount,
-      courseTopic,
-      language,
-      audience,
-      learningGoal,
-      courseTitle,
-    ],
+    queryKey: ['ai-suggestions', name, provider, model, refreshCount],
     queryFn: () =>
       fetchSuggestions({
         provider,
@@ -67,9 +56,23 @@ export default function SuggestionTextField({
         learningGoal,
         courseTitle,
       }),
-    enabled: canGenerate,
+    enabled: false,
     staleTime: 0,
   });
+
+  useEffect(() => {
+    if (canGenerate && refreshCount === 0 && !suggestionsQuery.data) {
+      setRefreshCount(1);
+    }
+  }, [canGenerate, refreshCount, suggestionsQuery.data]);
+
+  const { refetch } = suggestionsQuery;
+
+  useEffect(() => {
+    if (refreshCount > 0) {
+      void refetch();
+    }
+  }, [refreshCount, refetch]);
 
   const applySuggestion = (value: string) => {
     form.setValue(name, value, { shouldDirty: true, shouldTouch: true, shouldValidate: true });
