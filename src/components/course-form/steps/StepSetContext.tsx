@@ -1,50 +1,61 @@
-import { TextField } from '@mui/material';
-import { Controller } from 'react-hook-form';
+import { useState } from 'react';
+import { Stack } from '@mui/material';
 import { StepComponentProps } from '../types';
+import AiModelSelector from '../step-set-context/AiModelSelector';
+import SuggestionTextField from '../step-set-context/SuggestionTextField';
+import { AiProvider, PROVIDER_MODELS } from '../../../lib/ai/models';
 
-export default function StepSetContext({ control }: StepComponentProps) {
+const defaultProvider: AiProvider = 'openai';
+const defaultModel = PROVIDER_MODELS[defaultProvider][0].id;
+
+export default function StepSetContext({ form }: StepComponentProps) {
+  const [provider, setProvider] = useState<AiProvider>(defaultProvider);
+  const [model, setModel] = useState(defaultModel);
+
+  const onProviderChange = (nextProvider: AiProvider) => {
+    setProvider(nextProvider);
+    const firstAvailableModel = PROVIDER_MODELS[nextProvider].find((option) => option.available);
+    if (firstAvailableModel) {
+      setModel(firstAvailableModel.id);
+    }
+  };
+
   return (
-    <>
-      <Controller
+    <Stack spacing={3}>
+      <AiModelSelector
+        provider={provider}
+        model={model}
+        onProviderChange={onProviderChange}
+        onModelChange={setModel}
+      />
+
+      <SuggestionTextField
+        form={form}
         name="learningGoal"
-        control={control}
-        render={({ field, fieldState }) => (
-          <TextField
-            {...field}
-            label="What is the goal that your learners reach?"
-            multiline
-            minRows={3}
-            error={!!fieldState.error}
-            helperText={fieldState.error?.message}
-          />
-        )}
+        label="What is the goal that your learners reach?"
+        multiline
+        minRows={3}
+        provider={provider}
+        model={model}
       />
-      <Controller
+
+      <SuggestionTextField
+        form={form}
         name="courseTitle"
-        control={control}
-        render={({ field, fieldState }) => (
-          <TextField
-            {...field}
-            label="What would you like to name your course?"
-            error={!!fieldState.error}
-            helperText={fieldState.error?.message}
-          />
-        )}
+        label="What would you like to name your course?"
+        provider={provider}
+        model={model}
       />
-      <Controller
+
+      <SuggestionTextField
+        form={form}
         name="courseDescription"
-        control={control}
-        render={({ field, fieldState }) => (
-          <TextField
-            {...field}
-            label="How would you describe your course?"
-            multiline
-            minRows={4}
-            error={!!fieldState.error}
-            helperText={fieldState.error?.message}
-          />
-        )}
+        label="How would you describe your course?"
+        multiline
+        minRows={4}
+        provider={provider}
+        model={model}
       />
-    </>
+    </Stack>
   );
 }
