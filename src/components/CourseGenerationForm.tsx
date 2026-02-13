@@ -38,7 +38,8 @@ export default function CourseGenerationForm() {
       courseTopic: '',
       language: '',
       audience: '',
-      coursePace: undefined,
+      learnerProficiency: undefined,
+      courseDuration: undefined,
       learningGoal: '',
       courseTitle: '',
       courseDescription: '',
@@ -48,9 +49,19 @@ export default function CourseGenerationForm() {
     },
   });
 
-  const context = form.watch(['courseTopic', 'language', 'audience', 'learningGoal', 'courseTitle']);
-  const [courseTopic, language, audience, learningGoal, courseTitle] = context;
-  const canGenerateStructure = Boolean(courseTopic && language && audience && learningGoal && courseTitle);
+  const context = form.watch([
+    'courseTopic',
+    'language',
+    'audience',
+    'learnerProficiency',
+    'courseDuration',
+    'learningGoal',
+    'courseTitle',
+  ]);
+  const [courseTopic, language, audience, learnerProficiency, courseDuration, learningGoal, courseTitle] = context;
+  const canGenerateStructure = Boolean(
+    courseTopic && language && audience && learnerProficiency && courseDuration && learningGoal && courseTitle
+  );
 
   const {
     data: suggestedStructures = [],
@@ -67,6 +78,8 @@ export default function CourseGenerationForm() {
         courseTopic,
         language,
         audience,
+        learnerProficiency,
+        courseDuration,
         learningGoal,
         courseTitle,
       }),
@@ -87,7 +100,7 @@ export default function CourseGenerationForm() {
 
   const stepFields = useMemo<Record<number, Array<keyof FormValues>>>(
     () => ({
-      0: ['courseTopic', 'language', 'audience', 'coursePace'],
+      0: ['courseTopic', 'language', 'audience', 'learnerProficiency', 'courseDuration'],
       1: ['learningGoal', 'courseTitle', 'courseDescription'],
       2: ['modules'],
       3: ['includeImages', 'imageStyle'],

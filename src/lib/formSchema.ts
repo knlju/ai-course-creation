@@ -4,8 +4,11 @@ export const stepOneSchema = z.object({
   courseTopic: z.string().min(20, 'Please provide at least 20 characters.'),
   language: z.string().min(1, 'Select a language.'),
   audience: z.string().min(10, 'Please describe your audience (min 10 chars).'),
-  coursePace: z.enum(['quick', 'regular', 'extensive'], {
-    required_error: 'Select a course pace.',
+  learnerProficiency: z.enum(['entry', 'intermediate', 'advanced'], {
+    required_error: 'Select learner proficiency.',
+  }),
+  courseDuration: z.enum(['quick', 'regular', 'extensive'], {
+    required_error: 'Select a course duration.',
   }),
 });
 

@@ -14,7 +14,10 @@ export type SuggestedStructure = {
   modules: SuggestedStructureModule[];
 };
 
-type PromptInput = Pick<FormValues, 'courseTopic' | 'language' | 'audience' | 'learningGoal' | 'courseTitle'>;
+type PromptInput = Pick<
+  FormValues,
+  'courseTopic' | 'language' | 'audience' | 'learnerProficiency' | 'courseDuration' | 'learningGoal' | 'courseTitle'
+>;
 
 export function buildCourseStructurePrompt(input: PromptInput) {
   return [
@@ -31,6 +34,8 @@ export function buildCourseStructurePrompt(input: PromptInput) {
     `Course topic: ${input.courseTopic || 'N/A'}`,
     `Language: ${input.language || 'English'}`,
     `Audience: ${input.audience || 'N/A'}`,
+    `Learner proficiency: ${input.learnerProficiency || 'N/A'}`,
+    `Course duration: ${input.courseDuration || 'N/A'}`,
     `Learning goal: ${input.learningGoal || 'N/A'}`,
     `Course title: ${input.courseTitle || 'N/A'}`,
   ].join('\n');

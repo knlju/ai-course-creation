@@ -11,6 +11,8 @@ const requestSchema = z.object({
   courseTopic: z.string().default(''),
   language: z.string().default('English'),
   audience: z.string().default(''),
+  learnerProficiency: z.enum(['entry', 'intermediate', 'advanced']).default('entry'),
+  courseDuration: z.enum(['quick', 'regular', 'extensive']).default('regular'),
   learningGoal: z.string().default(''),
   courseTitle: z.string().default(''),
 });
