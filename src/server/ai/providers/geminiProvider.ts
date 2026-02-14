@@ -44,7 +44,7 @@ function parseGeminiError(status: number, details: string): string {
 export class GeminiSuggestionProvider implements SuggestionProvider {
   readonly provider = 'gemini' as const;
 
-  async generateSuggestions({ prompt, model }: SuggestionContext): Promise<string[]> {
+  async generateSuggestions({ prompt, model, temperature, topP }: SuggestionContext): Promise<string[]> {
     const apiKey = process.env.GEMINI_API_KEY;
 
     if (!apiKey) {
@@ -60,7 +60,8 @@ export class GeminiSuggestionProvider implements SuggestionProvider {
         },
         body: JSON.stringify({
           generationConfig: {
-            temperature: 0.7,
+            temperature,
+            topP,
           },
           contents: [{ role: 'user', parts: [{ text: prompt }] }],
           systemInstruction: {

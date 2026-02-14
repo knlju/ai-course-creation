@@ -4,6 +4,11 @@ import { SuggestedStructure } from './courseStructure';
 type FetchCourseStructuresInput = {
   provider: AiProvider;
   model: string;
+  temperature: number;
+  topP: number;
+  presencePenalty: number;
+  frequencyPenalty: number;
+  logitBias: Record<string, number>;
   courseTopic: string;
   language: string;
   audience: string;
