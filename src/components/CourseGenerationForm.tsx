@@ -15,6 +15,7 @@ import {
   stepTwoSchema,
 } from '../lib/formSchema';
 import { uiTokens } from '../lib/designTokens';
+import AiModelPanel from './course-form/AiModelPanel';
 import FormStepSidebar, { FormStep } from './course-form/FormStepSidebar';
 import StepCourseStructure from './course-form/steps/StepCourseStructure';
 import StepDefinePurpose from './course-form/steps/StepDefinePurpose';
@@ -44,6 +45,8 @@ export default function CourseGenerationForm() {
       audience: '',
       learnerProficiency: undefined,
       courseDuration: undefined,
+      aiProvider: 'openai',
+      aiModel: 'gpt-4.1-nano',
       learningGoal: '',
       courseTitle: '',
       courseDescription: '',
@@ -65,8 +68,11 @@ export default function CourseGenerationForm() {
     'courseDuration',
     'learningGoal',
     'courseTitle',
+    'aiProvider',
+    'aiModel',
   ]);
-  const [courseTopic, language, audience, learnerProficiency, courseDuration, learningGoal, courseTitle] = context;
+  const [courseTopic, language, audience, learnerProficiency, courseDuration, learningGoal, courseTitle, aiProvider, aiModel] =
+    context;
 
   const canGenerateStructure = Boolean(
     courseTopic && language && audience && learnerProficiency && courseDuration && learningGoal && courseTitle
@@ -79,11 +85,11 @@ export default function CourseGenerationForm() {
     error: structureError,
     refetch: refetchStructures,
   } = useQuery({
-    queryKey: ['ai-course-structures', structureRefreshCount],
+    queryKey: ['ai-course-structures', structureRefreshCount, aiProvider, aiModel],
     queryFn: () =>
       fetchCourseStructures({
-        provider: 'openai',
-        model: 'gpt-4.1-nano',
+        provider: aiProvider,
+        model: aiModel,
         courseTopic,
         language,
         audience,
@@ -170,16 +176,16 @@ export default function CourseGenerationForm() {
   return (
     <Card sx={{ backgroundColor: 'background.paper', color: 'text.primary' }}>
       <CardContent sx={{ p: { xs: 2, md: 3 } }}>
-        <Grid container spacing={3}>
+        <Grid container spacing={3} alignItems="stretch">
           <FormStepSidebar steps={steps} activeStep={activeStep} />
 
-          <Grid item xs={12} md={9}>
-            <Stack spacing={3}>
+          <Grid item xs={12} md={6}>
+            <Stack spacing={3} sx={{ height: '100%' }}>
               <Typography component="h2" variant="h2">
                 {steps[activeStep].title}
               </Typography>
 
-              <Stack spacing={2} component="form" onSubmit={form.handleSubmit(onSubmit)}>
+              <Stack spacing={2} component="form" onSubmit={form.handleSubmit(onSubmit)} sx={{ flexGrow: 1 }}>
                 {activeStep === 0 && <StepDefinePurpose control={form.control} form={form} />}
                 {activeStep === 1 && <StepSetContext control={form.control} form={form} />}
                 {activeStep === 2 && (
@@ -199,7 +205,7 @@ export default function CourseGenerationForm() {
                 {activeStep === 3 && <StepModulesAndLessonsEditor control={form.control} form={form} />}
                 {activeStep === 4 && <StepGenerateContent control={form.control} form={form} />}
 
-                <Box display="flex" justifyContent="space-between" pt={uiTokens.spacing.sm}>
+                <Box display="flex" justifyContent="space-between" pt={uiTokens.spacing.sm} mt="auto">
                   <Button disabled={activeStep === 0} onClick={previousStep} variant="outlined">
                     Previous step
                   </Button>
@@ -216,6 +222,10 @@ export default function CourseGenerationForm() {
                 </Box>
               </Stack>
             </Stack>
+          </Grid>
+
+          <Grid item xs={12} md={3}>
+            <AiModelPanel form={form} />
           </Grid>
         </Grid>
       </CardContent>

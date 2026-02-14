@@ -40,12 +40,102 @@ type OpenAIResponse = {
   }>;
 };
 
+type GeminiResponse = {
+  candidates?: Array<{
+    content?: {
+      parts?: Array<{
+        text?: string;
+      }>;
+    };
+  }>;
+};
+
 function toSuggestedStructures(structures: z.infer<typeof structureSchema>[]): SuggestedStructure[] {
   return structures.map((structure, index) => ({
     id: `s${index + 1}`,
     label: structure.label,
     modules: structure.modules,
   }));
+}
+
+async function fetchOpenAiStructures(model: string, prompt: string): Promise<string> {
+  const apiKey = process.env.OPENAI_KEY;
+
+  if (!apiKey) {
+    throw new Error('OPENAI_KEY is not configured');
+  }
+
+  const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify({
+      model,
+      temperature: 0.7,
+      messages: [
+        { role: 'system', content: 'You are a precise assistant that returns valid JSON only.' },
+        { role: 'user', content: prompt },
+      ],
+    }),
+  });
+
+  if (!response.ok) {
+    const details = await response.text();
+    throw new Error(`OpenAI request failed: ${response.status} ${details}`);
+  }
+
+  const data = (await response.json()) as OpenAIResponse;
+  const content = data.choices?.[0]?.message?.content;
+
+  if (!content) {
+    throw new Error('OpenAI returned an empty response');
+  }
+
+  return content;
+}
+
+async function fetchGeminiStructures(model: string, prompt: string): Promise<string> {
+  const apiKey = process.env.GEMINI_API_KEY;
+
+  if (!apiKey) {
+    throw new Error('GEMINI_API_KEY is not configured');
+  }
+
+  const response = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        generationConfig: {
+          temperature: 0.7,
+        },
+        contents: [{ role: 'user', parts: [{ text: prompt }] }],
+        systemInstruction: {
+          role: 'system',
+          parts: [{ text: 'You are a precise assistant that returns valid JSON only.' }],
+        },
+      }),
+    }
+  );
+
+  if (!response.ok) {
+    const details = await response.text();
+    throw new Error(`Gemini request failed: ${response.status} ${details}`);
+  }
+
+  const data = (await response.json()) as GeminiResponse;
+  const content = data.candidates?.[0]?.content?.parts?.map((part) => part.text ?? '').join('').trim();
+
+  if (!content) {
+    throw new Error('Gemini returned an empty response');
+  }
+
+  return content;
 }
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -69,45 +159,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(400).json({ error: `Model ${payload.model} is not available for ${payload.provider}` });
   }
 
-  if (payload.provider !== 'openai') {
-    return res.status(400).json({ error: `${payload.provider} provider is not configured yet` });
-  }
-
-  const apiKey = process.env.OPENAI_KEY;
-
-  if (!apiKey) {
-    return res.status(500).json({ error: 'OPENAI_KEY is not configured' });
-  }
-
   try {
     const prompt = buildCourseStructurePrompt(payload);
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({
-        model: payload.model,
-        temperature: 0.7,
-        messages: [
-          { role: 'system', content: 'You are a precise assistant that returns valid JSON only.' },
-          { role: 'user', content: prompt },
-        ],
-      }),
-    });
-
-    if (!response.ok) {
-      const details = await response.text();
-      return res.status(500).json({ error: `OpenAI request failed: ${response.status} ${details}` });
-    }
-
-    const data = (await response.json()) as OpenAIResponse;
-    const content = data.choices?.[0]?.message?.content;
-
-    if (!content) {
-      return res.status(500).json({ error: 'OpenAI returned an empty response' });
-    }
+    const content =
+      payload.provider === 'openai'
+        ? await fetchOpenAiStructures(payload.model, prompt)
+        : await fetchGeminiStructures(payload.model, prompt);
 
     const parsed = responseSchema.parse(JSON.parse(content));
 

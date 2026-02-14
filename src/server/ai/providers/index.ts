@@ -1,10 +1,11 @@
 import { AiProvider } from '../../../lib/ai/models';
+import { GeminiSuggestionProvider } from './geminiProvider';
 import { OpenAiSuggestionProvider } from './openaiProvider';
 import { SuggestionProvider } from './types';
 
 const providers: Record<AiProvider, SuggestionProvider | null> = {
   openai: new OpenAiSuggestionProvider(),
-  gemini: null,
+  gemini: new GeminiSuggestionProvider(),
 };
 
 export function getSuggestionProvider(provider: AiProvider): SuggestionProvider {

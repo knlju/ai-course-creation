@@ -12,6 +12,13 @@ export const stepOneSchema = z.object({
   }),
 });
 
+export const aiModelSchema = z.object({
+  aiProvider: z.enum(['openai', 'gemini'], {
+    required_error: 'Select an AI provider.',
+  }),
+  aiModel: z.string().min(1, 'Select an AI model.'),
+});
+
 export const stepTwoSchema = z.object({
   learningGoal: z.string().min(15, 'Learning goal is required (min 15 chars).'),
   courseTitle: z.string().min(5, 'Course title is required.'),
@@ -50,6 +57,7 @@ export const stepFiveSchema = z.object({
 });
 
 export const fullSchema = stepOneSchema
+  .merge(aiModelSchema)
   .merge(stepTwoSchema)
   .merge(stepThreeSchema)
   .merge(stepFiveSchema);
