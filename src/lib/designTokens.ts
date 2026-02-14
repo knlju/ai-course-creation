@@ -10,8 +10,8 @@ export const uiTokens = {
     xxxl: 6, // 48px
   },
   layout: {
-    contentMaxWidth: 760,
-    sectionMaxWidth: 640,
+    contentMaxWidth: 1200,
+    sectionMaxWidth: 960,
     mobilePadding: 2,
     desktopPadding: 3,
   },
