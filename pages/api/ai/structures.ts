@@ -30,6 +30,11 @@ const requestSchema = z.object({
   courseDuration: z.enum(['quick', 'regular', 'extensive']).default('regular'),
   learningGoal: z.string().default(''),
   courseTitle: z.string().default(''),
+  temperature: z.coerce.number().min(0).max(2).default(0.7),
+  topP: z.coerce.number().min(0).max(1).default(1),
+  presencePenalty: z.coerce.number().min(-2).max(2).default(0),
+  frequencyPenalty: z.coerce.number().min(-2).max(2).default(0),
+  logitBias: z.record(z.coerce.number()).default({}),
 });
 
 type OpenAIResponse = {
@@ -58,7 +63,15 @@ function toSuggestedStructures(structures: z.infer<typeof structureSchema>[]): S
   }));
 }
 
-async function fetchOpenAiStructures(model: string, prompt: string): Promise<string> {
+type GenerationSettings = {
+  temperature: number;
+  topP: number;
+  presencePenalty: number;
+  frequencyPenalty: number;
+  logitBias: Record<string, number>;
+};
+
+async function fetchOpenAiStructures(model: string, prompt: string, settings: GenerationSettings): Promise<string> {
   const apiKey = process.env.OPENAI_KEY;
 
   if (!apiKey) {
@@ -73,7 +86,11 @@ async function fetchOpenAiStructures(model: string, prompt: string): Promise<str
     },
     body: JSON.stringify({
       model,
-      temperature: 0.7,
+      temperature: settings.temperature,
+      top_p: settings.topP,
+      presence_penalty: settings.presencePenalty,
+      frequency_penalty: settings.frequencyPenalty,
+      logit_bias: Object.keys(settings.logitBias).length ? settings.logitBias : undefined,
       messages: [
         { role: 'system', content: 'You are a precise assistant that returns valid JSON only.' },
         { role: 'user', content: prompt },
@@ -96,7 +113,7 @@ async function fetchOpenAiStructures(model: string, prompt: string): Promise<str
   return content;
 }
 
-async function fetchGeminiStructures(model: string, prompt: string): Promise<string> {
+async function fetchGeminiStructures(model: string, prompt: string, settings: GenerationSettings): Promise<string> {
   const apiKey = process.env.GEMINI_API_KEY;
 
   if (!apiKey) {
@@ -112,7 +129,8 @@ async function fetchGeminiStructures(model: string, prompt: string): Promise<str
       },
       body: JSON.stringify({
         generationConfig: {
-          temperature: 0.7,
+          temperature: settings.temperature,
+          topP: settings.topP,
         },
         contents: [{ role: 'user', parts: [{ text: prompt }] }],
         systemInstruction: {
@@ -163,8 +181,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const prompt = buildCourseStructurePrompt(payload);
     const content =
       payload.provider === 'openai'
-        ? await fetchOpenAiStructures(payload.model, prompt)
-        : await fetchGeminiStructures(payload.model, prompt);
+        ? await fetchOpenAiStructures(payload.model, prompt, payload)
+        : await fetchGeminiStructures(payload.model, prompt, payload);
 
     const parsed = responseSchema.parse(JSON.parse(content));
 

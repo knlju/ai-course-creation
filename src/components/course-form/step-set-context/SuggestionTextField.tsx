@@ -26,6 +26,11 @@ type Props = {
   minRows?: number;
   provider: AiProvider;
   model: string;
+  temperature: number;
+  topP: number;
+  presencePenalty: number;
+  frequencyPenalty: number;
+  logitBias: FormValues['logitBias'];
 };
 
 export default function SuggestionTextField({
@@ -36,6 +41,11 @@ export default function SuggestionTextField({
   minRows,
   provider,
   model,
+  temperature,
+  topP,
+  presencePenalty,
+  frequencyPenalty,
+  logitBias,
 }: Props) {
   const [refreshCount, setRefreshCount] = useState(0);
   const context = form.watch([
@@ -65,6 +75,15 @@ export default function SuggestionTextField({
         courseDuration,
         learningGoal,
         courseTitle,
+        temperature,
+        topP,
+        presencePenalty,
+        frequencyPenalty,
+        logitBias: Object.fromEntries(
+          logitBias
+            .filter((entry) => entry.token.trim())
+            .map((entry) => [entry.token.trim(), entry.bias])
+        ),
       }),
     enabled: false,
     staleTime: 0,

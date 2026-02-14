@@ -12,11 +12,26 @@ export const stepOneSchema = z.object({
   }),
 });
 
+const logitBiasEntrySchema = z.object({
+  token: z.string().trim().min(1, 'Token ID is required.'),
+  bias: z.coerce.number().min(-100).max(100),
+});
+
 export const aiModelSchema = z.object({
   aiProvider: z.enum(['openai', 'gemini'], {
     required_error: 'Select an AI provider.',
   }),
   aiModel: z.string().min(1, 'Select an AI model.'),
+  temperature: z.coerce.number().min(0).max(2),
+  topP: z.coerce.number().min(0).max(1),
+  presencePenalty: z.coerce.number().min(-2).max(2),
+  frequencyPenalty: z.coerce.number().min(-2).max(2),
+  logitBias: z
+    .array(logitBiasEntrySchema)
+    .refine(
+      (entries) => new Set(entries.map((entry) => entry.token.trim())).size === entries.length,
+      'Token IDs in logit bias must be unique.'
+    ),
 });
 
 export const stepTwoSchema = z.object({

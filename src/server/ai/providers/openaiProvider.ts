@@ -20,7 +20,15 @@ function parseSuggestions(payload: string): string[] {
 export class OpenAiSuggestionProvider implements SuggestionProvider {
   readonly provider = 'openai' as const;
 
-  async generateSuggestions({ prompt, model }: SuggestionContext): Promise<string[]> {
+  async generateSuggestions({
+    prompt,
+    model,
+    temperature,
+    topP,
+    presencePenalty,
+    frequencyPenalty,
+    logitBias,
+  }: SuggestionContext): Promise<string[]> {
     const apiKey = process.env.OPENAI_KEY;
 
     if (!apiKey) {
@@ -35,7 +43,11 @@ export class OpenAiSuggestionProvider implements SuggestionProvider {
       },
       body: JSON.stringify({
         model,
-        temperature: 0.7,
+        temperature,
+        top_p: topP,
+        presence_penalty: presencePenalty,
+        frequency_penalty: frequencyPenalty,
+        logit_bias: Object.keys(logitBias).length ? logitBias : undefined,
         messages: [
           { role: 'system', content: 'You are a precise assistant that returns valid JSON only.' },
           { role: 'user', content: prompt },

@@ -4,6 +4,11 @@ import { AiProvider } from './models';
 type FetchSuggestionsInput = {
   provider: AiProvider;
   model: string;
+  temperature: number;
+  topP: number;
+  presencePenalty: number;
+  frequencyPenalty: number;
+  logitBias: Record<string, number>;
   field: SuggestionField;
   courseTopic: string;
   language: string;

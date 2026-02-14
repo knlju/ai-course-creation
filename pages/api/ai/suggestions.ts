@@ -15,6 +15,11 @@ const requestSchema = z.object({
   courseDuration: z.enum(['quick', 'regular', 'extensive']).default('regular'),
   learningGoal: z.string().default(''),
   courseTitle: z.string().default(''),
+  temperature: z.coerce.number().min(0).max(2).default(0.7),
+  topP: z.coerce.number().min(0).max(1).default(1),
+  presencePenalty: z.coerce.number().min(-2).max(2).default(0),
+  frequencyPenalty: z.coerce.number().min(-2).max(2).default(0),
+  logitBias: z.record(z.coerce.number()).default({}),
 });
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -45,6 +50,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       field: payload.field,
       model: payload.model,
       prompt,
+      temperature: payload.temperature,
+      topP: payload.topP,
+      presencePenalty: payload.presencePenalty,
+      frequencyPenalty: payload.frequencyPenalty,
+      logitBias: payload.logitBias,
     });
 
     return res.status(200).json({ suggestions });

@@ -5,6 +5,11 @@ export type SuggestionContext = {
   field: SuggestionField;
   prompt: string;
   model: string;
+  temperature: number;
+  topP: number;
+  presencePenalty: number;
+  frequencyPenalty: number;
+  logitBias: Record<string, number>;
 };
 
 export interface SuggestionProvider {

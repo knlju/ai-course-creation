@@ -47,6 +47,11 @@ export default function CourseGenerationForm() {
       courseDuration: undefined,
       aiProvider: 'openai',
       aiModel: 'gpt-4.1-nano',
+      temperature: 0.7,
+      topP: 1,
+      presencePenalty: 0,
+      frequencyPenalty: 0,
+      logitBias: [],
       learningGoal: '',
       courseTitle: '',
       courseDescription: '',
@@ -70,9 +75,34 @@ export default function CourseGenerationForm() {
     'courseTitle',
     'aiProvider',
     'aiModel',
+    'temperature',
+    'topP',
+    'presencePenalty',
+    'frequencyPenalty',
+    'logitBias',
   ]);
-  const [courseTopic, language, audience, learnerProficiency, courseDuration, learningGoal, courseTitle, aiProvider, aiModel] =
-    context;
+  const [
+    courseTopic,
+    language,
+    audience,
+    learnerProficiency,
+    courseDuration,
+    learningGoal,
+    courseTitle,
+    aiProvider,
+    aiModel,
+    temperature,
+    topP,
+    presencePenalty,
+    frequencyPenalty,
+    logitBias,
+  ] = context;
+
+  const logitBiasMap = Object.fromEntries(
+    logitBias
+      .filter((entry) => entry.token.trim())
+      .map((entry) => [entry.token.trim(), entry.bias])
+  );
 
   const canGenerateStructure = Boolean(
     courseTopic && language && audience && learnerProficiency && courseDuration && learningGoal && courseTitle
@@ -97,6 +127,11 @@ export default function CourseGenerationForm() {
         courseDuration,
         learningGoal,
         courseTitle,
+        temperature,
+        topP,
+        presencePenalty,
+        frequencyPenalty,
+        logitBias: logitBiasMap,
       }),
     enabled: false,
   });
