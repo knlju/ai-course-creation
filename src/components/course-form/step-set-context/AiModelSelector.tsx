@@ -15,7 +15,7 @@ export default function AiModelSelector({ provider, model, onProviderChange, onM
     <Stack spacing={1}>
       <Typography variant="subtitle1">Suggestion model</Typography>
       <FormControl>
-        <FormLabel sx={{ color: '#fff' }}>Provider</FormLabel>
+        <FormLabel>Provider</FormLabel>
         <RadioGroup
           row
           value={provider}
@@ -27,7 +27,7 @@ export default function AiModelSelector({ provider, model, onProviderChange, onM
       </FormControl>
 
       <FormControl>
-        <FormLabel sx={{ color: '#fff' }}>Model</FormLabel>
+        <FormLabel>Model</FormLabel>
         <RadioGroup row value={model} onChange={(event) => onModelChange(event.target.value)}>
           {modelOptions.map((option) => (
             <FormControlLabel

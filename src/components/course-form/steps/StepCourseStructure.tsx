@@ -47,7 +47,7 @@ export default function StepCourseStructure({
                 variant="outlined"
                 sx={{
                   height: '100%',
-                  borderColor: selectedStructureId === structure.id ? 'primary.main' : '#4A4F6E',
+                  borderColor: selectedStructureId === structure.id ? 'primary.main' : 'divider',
                 }}
               >
                 <CardContent>
@@ -63,7 +63,7 @@ export default function StepCourseStructure({
                   <Box maxHeight={290} overflow="auto" pr={0.5}>
                     {structure.modules.map((module) => (
                       <Box key={module.title} mb={1.25}>
-                        <Typography variant="body2" sx={{ backgroundColor: '#2E345A', p: 0.75, borderRadius: 1 }}>
+                        <Typography variant="body2" sx={{ backgroundColor: 'background.default', p: 1, borderRadius: 1 }}>
                           {module.title}
                         </Typography>
                         {module.lessons.map((lesson) => (
@@ -85,18 +85,7 @@ export default function StepCourseStructure({
       )}
 
       <Box textAlign="center" pt={1}>
-        <Typography
-          component="button"
-          type="button"
-          onClick={onRegenerate}
-          sx={{
-            background: 'none',
-            border: 'none',
-            color: 'primary.main',
-            cursor: 'pointer',
-            fontSize: '1.1rem',
-          }}
-        >
+        <Typography component="button" type="button" onClick={onRegenerate} sx={{ background: 'none', border: 'none', color: 'primary.main', cursor: 'pointer', fontSize: '1rem' }}>
           Other suggestions...
         </Typography>
       </Box>
@@ -111,12 +100,12 @@ export default function StepCourseStructure({
             Selected structure preview
           </Typography>
           {modulesArray.fields.map((module, index) => (
-            <Box key={module.id} mb={1} p={1.5} sx={{ border: '1px solid #4A4F6E', borderRadius: 1 }}>
+            <Box key={module.id} mb={1} p={1.5} sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 1 }}>
               <Typography>
                 {index + 1}. {module.title}
               </Typography>
               {module.lessons.map((lesson, lessonIndex) => (
-                <Typography key={`${module.id}-${lessonIndex}`} variant="body2" color="#b8bdd8">
+                <Typography key={`${module.id}-${lessonIndex}`} variant="body2" color="text.secondary">
                   - {lesson.title}
                 </Typography>
               ))}

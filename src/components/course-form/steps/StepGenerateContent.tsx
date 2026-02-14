@@ -35,8 +35,8 @@ export default function StepGenerateContent({ control, form }: StepComponentProp
   };
 
   return (
-    <Stack spacing={1}>
-      <Typography variant="h5">Content preferences</Typography>
+    <Stack spacing={2}>
+      <Typography component="h3" variant="h3">Content preferences</Typography>
       <Controller
         name="generateAllContent"
         control={control}
