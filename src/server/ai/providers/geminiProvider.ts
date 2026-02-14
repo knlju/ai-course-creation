@@ -19,6 +19,28 @@ function parseSuggestions(payload: string): string[] {
   return parsed.suggestions.slice(0, 3).map((item) => item.trim()).filter(Boolean);
 }
 
+
+function parseGeminiError(status: number, details: string): string {
+  if (status === 429) {
+    return [
+      'Gemini quota exceeded (429).',
+      'Your current Gemini plan has no remaining quota for this model.',
+      'Try another Gemini model, switch to OpenAI, or retry later.',
+      `Details: ${details}`,
+    ].join(' ');
+  }
+
+  if (status === 404) {
+    return [
+      'Selected Gemini model is unavailable for generateContent (404).',
+      'Please choose a different Gemini model from the dropdown.',
+      `Details: ${details}`,
+    ].join(' ');
+  }
+
+  return `Gemini request failed: ${status} ${details}`;
+}
+
 export class GeminiSuggestionProvider implements SuggestionProvider {
   readonly provider = 'gemini' as const;
 
@@ -51,7 +73,7 @@ export class GeminiSuggestionProvider implements SuggestionProvider {
 
     if (!response.ok) {
       const details = await response.text();
-      throw new Error(`Gemini request failed: ${response.status} ${details}`);
+      throw new Error(parseGeminiError(response.status, details));
     }
 
     const data = (await response.json()) as GeminiResponse;
